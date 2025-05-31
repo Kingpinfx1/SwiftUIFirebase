@@ -10,6 +10,7 @@ import SwiftUI
 struct RegistrationView: View {
     
     @State private var email: String = ""
+    @State private var balance: Double = 0.0
     @State private var fullname: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
@@ -116,7 +117,7 @@ struct RegistrationView: View {
                     
                     Button {
                         Task {
-                            await viewModel.createUser(withEmail: email, password: password, fullname: fullname)
+                            await viewModel.createUser(withEmail: email, password: password, fullname: fullname, balance: balance)
                         }
                     } label: {
                         if viewModel.isLoading {

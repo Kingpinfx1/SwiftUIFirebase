@@ -31,6 +31,7 @@ struct ProfileView: View {
                                     .fontWeight(.bold)
                                 Text(user.email)
                                     .font(.caption)
+                                Text("Balance: \(user.balance ?? 0.0, specifier: "%.2f")")
                             }
                         }
                     }
@@ -59,6 +60,9 @@ struct ProfileView: View {
                         .disabled(viewModel.isLoading)
                         
                     }
+                }
+                .refreshable {
+                    await viewModel.reloadUser()
                 }
                 
                 if viewModel.isLoading {

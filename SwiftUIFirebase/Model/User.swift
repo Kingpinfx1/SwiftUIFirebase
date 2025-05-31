@@ -11,6 +11,7 @@ struct User: Identifiable, Codable {
     let id: String
     let fullname: String
     let email: String
+    var balance: Double?
     
     var initials: String{
         let formatter = PersonNameComponentsFormatter()

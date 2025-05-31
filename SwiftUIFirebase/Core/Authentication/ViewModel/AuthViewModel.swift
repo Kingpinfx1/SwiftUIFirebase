@@ -82,12 +82,12 @@ class AuthViewModel: ObservableObject {
  
 
     
-    func createUser(withEmail email: String , password : String , fullname :String) async {
+    func createUser(withEmail email: String , password : String , fullname :String, balance: Double) async {
         isLoading = true
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.userSession = result.user
-            let user = User(id: result.user.uid, fullname: fullname, email: email)
+            let user = User(id: result.user.uid, fullname: fullname, email: email, balance : balance)
             let encodedUser = try Firestore.Encoder().encode(user)
             try await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
             await fetchUser()
@@ -108,18 +108,37 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+//    func deleteAccount() async {
+//        guard let user = Auth.auth().currentUser else { return }
+//        isLoading = true
+//        do {
+//            try await user.delete()
+//            self.userSession = nil
+//            self.currentUser = nil
+//        } catch let error as NSError {
+//            handleAuthError(error)
+//        }
+//        isLoading = false
+//    }
+    
     func deleteAccount() async {
         guard let user = Auth.auth().currentUser else { return }
         isLoading = true
+
         do {
+            try await Firestore.firestore().collection("users").document(user.uid).delete()
+
             try await user.delete()
+
             self.userSession = nil
             self.currentUser = nil
         } catch let error as NSError {
             handleAuthError(error)
         }
+
         isLoading = false
     }
+
     
     func resetPassword(withEmail email: String) async {
         isLoading = true
@@ -169,5 +188,21 @@ class AuthViewModel: ObservableObject {
             showAlert = true
         }
     }
+    
+ 
+    func reloadUser() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        do {
+            let snapshot = try await Firestore.firestore().collection("users").document(uid).getDocument()
+            if let data = snapshot.data() {
+                let user = try Firestore.Decoder().decode(User.self, from: data)
+                self.currentUser = user
+            }
+        } catch {
+            print("Failed to reload user: \(error.localizedDescription)")
+        }
+    }
+
 
 }
